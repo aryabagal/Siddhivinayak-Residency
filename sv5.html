@@ -1,0 +1,671 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Shri Siddhivinayak Venture - Enterprise CRM + AI</title>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=DM+Sans:wght@300;400;500;600;700&display=swap" rel="stylesheet" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --primary: #2563EB;
+      --primary-dark: #1D4ED8;
+      --primary-light: #EFF6FF;
+      --secondary: #0891B2;
+      --accent: #7C3AED;
+      --success: #059669;
+      --success-bg: #ECFDF5;
+      --warning: #D97706;
+      --warning-bg: #FFFBEB;
+      --error: #DC2626;
+      --error-bg: #FEF2F2;
+      --text-primary: #111827;
+      --text-secondary: #374151;
+      --text-muted: #6B7280;
+      --border: #E5E7EB;
+      --bg-page: #F8FAFC;
+      --bg-card: #FFFFFF;
+      --bg-surface: #F1F5F9;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --font-display: 'Playfair Display', Georgia, serif;
+      --font-body: 'DM Sans', system-ui, sans-serif;
+    }
+
+    body {
+      font-family: var(--font-body);
+      background: var(--bg-page);
+      color: var(--text-primary);
+      min-height: 100vh;
+      font-size: 14px;
+      line-height: 1.5;
+      overflow-x: hidden;
+      transition: background 0.3s ease, color 0.3s ease;
+    }
+
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes slideDown { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes modalScale { from { opacity: 0; transform: scale(0.92) translateY(10px); } to { opacity: 1; transform: scale(1) translateY(0); } }
+
+    .navbar {
+      background: linear-gradient(135deg, #1E293B 0%, #0F172A 100%);
+      color: white;
+      padding: 14px 28px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: 0 4px 20px rgba(0,0,0,0.12);
+      animation: slideDown 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    .nav-brand { display: flex; align-items: center; gap: 14px; }
+    .brand-logo {
+      width: 42px; height: 42px; background: linear-gradient(135deg, var(--primary), var(--secondary));
+      border-radius: 12px; display: flex; align-items: center;
+      justify-content: center; font-weight: bold; font-size: 20px;
+      box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+    }
+
+    .nav-user { display: flex; align-items: center; gap: 12px; font-size: 0.85rem; }
+    .role-badge {
+      background: rgba(255,255,255,0.12); border: 1px solid rgba(255,255,255,0.2);
+      padding: 4px 12px; border-radius: 999px; font-size: 0.75rem; text-transform: uppercase;
+      letter-spacing: 0.05em; transition: all 0.2s ease;
+    }
+    .role-badge:hover { background: rgba(255,255,255,0.25); }
+
+    .container { max-width: 1300px; margin: 0 auto; padding: 28px; animation: fadeIn 0.8s ease; }
+    .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 18px; margin-bottom: 28px; }
+    .card {
+      background: var(--bg-card); padding: 20px 24px; border-radius: var(--radius-lg);
+      border: 1px solid var(--border); box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+      transition: all 0.3s ease; animation: slideUp 0.6s ease-out;
+    }
+    .card:hover { transform: translateY(-4px); box-shadow: 0 12px 24px rgba(0,0,0,0.08); }
+    .card-title { font-size: 0.75rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700; }
+    .card-val { font-size: 1.8rem; font-weight: 700; margin-top: 6px; color: var(--text-primary); }
+
+    .btn {
+      padding: 9px 16px; border-radius: var(--radius-md); border: 1px solid transparent;
+      font-family: var(--font-body); font-weight: 600; font-size: 0.85rem; cursor: pointer;
+      display: inline-flex; align-items: center; gap: 6px; text-decoration: none;
+      transition: all 0.2s ease;
+    }
+    .btn:active { transform: scale(0.96); }
+    .btn-primary { background: linear-gradient(135deg, var(--primary) 0%, var(--primary-dark) 100%); color: white; }
+    .btn-ai { background: linear-gradient(135deg, var(--accent) 0%, #5B21B6 100%); color: white; box-shadow: 0 4px 14px rgba(124, 58, 237, 0.3); }
+    .btn-ai:hover { transform: translateY(-1px); box-shadow: 0 6px 18px rgba(124, 58, 237, 0.4); }
+    .btn-wa { background: #25D366; color: white; }
+    .btn-ghost { background: var(--bg-surface); color: var(--text-secondary); border-color: var(--border); }
+    .btn-edit { background: var(--primary-light); color: var(--primary); border-color: var(--primary-muted); }
+    .btn-disabled { background: var(--bg-surface); color: var(--text-muted); border-color: var(--border); cursor: not-allowed; opacity: 0.7; }
+    .btn-sm { padding: 5px 10px; font-size: 0.78rem; }
+
+    .table-card { background: var(--bg-card); border-radius: var(--radius-lg); border: 1px solid var(--border); box-shadow: 0 8px 24px rgba(0,0,0,0.04); overflow: hidden; }
+    .table-header { padding: 18px 24px; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; gap: 16px; flex-wrap: wrap; }
+    .table-scroll { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; text-align: left; font-size: 0.88rem; }
+    th { background: var(--bg-surface); padding: 12px 18px; font-weight: 700; text-transform: uppercase; font-size: 0.7rem; color: var(--text-secondary); border-bottom: 1px solid var(--border); }
+    td { padding: 14px 18px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+    tbody tr:hover { background: var(--primary-light); }
+
+    .badge { padding: 4px 10px; border-radius: 999px; font-size: 0.72rem; font-weight: 700; text-transform: uppercase; }
+    .badge-paid { background: var(--success-bg); color: var(--success); border: 1px solid var(--success); }
+    .badge-pending { background: var(--warning-bg); color: var(--warning); border: 1px solid var(--warning); }
+
+    .modal-overlay {
+      display: none; position: fixed; inset: 0; background: rgba(15, 23, 42, 0.6);
+      backdrop-filter: blur(6px); z-index: 200; align-items: center; justify-content: center; padding: 20px;
+    }
+    .modal-overlay.open { display: flex; }
+    .modal {
+      background: white; padding: 28px; border-radius: var(--radius-lg); width: 100%; max-width: 580px;
+      box-shadow: 0 20px 40px rgba(0,0,0,0.2); animation: modalScale 0.3s ease;
+    }
+    .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 18px; }
+    .form-group { display: flex; flex-direction: column; gap: 5px; }
+    label { font-size: 0.75rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; }
+    input { padding: 10px 12px; border: 1.5px solid var(--border); border-radius: var(--radius-md); font-family: var(--font-body); outline: none; }
+
+    /* AI Assistant Drawer Panel */
+    .ai-drawer {
+      position: fixed; bottom: 85px; right: 28px; width: 380px; height: 500px;
+      background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--radius-lg);
+      box-shadow: 0 16px 40px rgba(0,0,0,0.18); z-index: 250; display: none; flex-direction: column;
+      overflow: hidden; animation: slideUp 0.3s ease;
+    }
+    .ai-drawer.open { display: flex; }
+    .ai-head {
+      background: linear-gradient(135deg, var(--accent) 0%, #4C1D95 100%); color: white;
+      padding: 14px 18px; display: flex; align-items: center; justify-content: space-between;
+    }
+    .ai-messages {
+      flex: 1; padding: 16px; overflow-y: auto; display: flex; flex-direction: column; gap: 10px;
+      background: var(--bg-surface); font-size: 0.85rem;
+    }
+    .ai-msg { padding: 10px 14px; border-radius: 12px; max-width: 85%; word-wrap: break-word; }
+    .ai-msg.bot { background: white; border: 1px solid var(--border); align-self: flex-start; }
+    .ai-msg.user { background: var(--primary); color: white; align-self: flex-end; }
+    .ai-input-wrap { padding: 12px; border-top: 1px solid var(--border); display: flex; gap: 8px; background: white; }
+
+    /* Cash Bill Modal Styles */
+    .bill-modal { max-width: 700px; padding: 20px; background: #fff; }
+    .bill-container {
+      width: 100%; background: #fff; padding: 25px; border: 2px solid #000; box-sizing: border-box;
+      color: #000; font-family: Arial, sans-serif;
+    }
+    .bill-container .header-top { display: flex; justify-content: space-between; font-size: 13px; font-weight: bold; margin-bottom: 8px; }
+    .bill-container .title { text-align: center; font-size: 24px; font-weight: 900; text-transform: uppercase; letter-spacing: 1px; margin: 5px 0 2px 0; }
+    .bill-container .subtitle { text-align: center; font-size: 13px; margin-bottom: 12px; }
+    .bill-container .customer-details { margin-top: 15px; font-size: 14px; line-height: 1.8; }
+    .bill-container .details-row { display: flex; justify-content: space-between; }
+    .bill-container .dotted-line { border-bottom: 1px dotted #000; display: inline-block; flex-grow: 1; margin-left: 5px; }
+    .bill-container table { width: 100%; border-collapse: collapse; margin-top: 15px; }
+    .bill-container table, .bill-container th, .bill-container td { border: 1px solid #000; }
+    .bill-container th { padding: 6px; font-size: 13px; text-align: center; background-color: #f9f9f9; }
+    .bill-container td { padding: 8px; height: 28px; }
+    .bill-container .sl-col { width: 8%; text-align: center; }
+    .bill-container .particulars-col { width: 52%; }
+    .bill-container .qty-col { width: 12%; text-align: center; }
+    .bill-container .rate-col { width: 13%; text-align: right; }
+    .bill-container .amount-col { width: 15%; text-align: right; }
+    .bill-container .total-row td { font-weight: bold; text-align: right; padding: 8px; }
+
+    @media print {
+      body * { visibility: hidden; }
+      #billModalOverlay, #billModalOverlay * { visibility: visible; }
+      #billModalOverlay { position: absolute; left: 0; top: 0; width: 100%; background: none; padding: 0; }
+      .bill-modal { box-shadow: none; border: none; width: 100%; max-width: 100%; }
+      .bill-actions { display: none !important; }
+    }
+
+    #toastWrap { position: fixed; bottom: 24px; right: 24px; z-index: 300; display: flex; flex-direction: column; gap: 10px; }
+    .toast { background: #0F172A; color: white; padding: 12px 20px; border-radius: var(--radius-md); font-size: 0.85rem; }
+  </style>
+</head>
+<body>
+
+<nav class="navbar" id="mainNavbar">
+  <div class="nav-brand">
+    <div class="brand-logo">💧</div>
+    <div>
+      <div style="font-weight:700; font-family:var(--font-display); font-size:1.15rem;" id="mainTitle">Shri Siddhivinayak Venture</div>
+      <div style="font-size:0.72rem; opacity:0.8;">Enterprise Client Directory & AI Automation</div>
+    </div>
+  </div>
+  <div class="nav-user">
+    <span>Role: <strong id="userRole">Admin</strong></span>
+    <span class="role-badge" onclick="toggleRole()" style="cursor:pointer;">Switch Access</span>
+  </div>
+</nav>
+
+<main class="container">
+  <div class="stats-grid">
+    <div class="card">
+      <div class="card-title">Total Receivables</div>
+      <div class="card-val" id="statReceivables">₹0</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Active Clients</div>
+      <div class="card-val" id="statClients">0</div>
+    </div>
+    <div class="card">
+      <div class="card-title">Service Calls Due</div>
+      <div class="card-val" id="statServiceDue" style="color:var(--warning);">0</div>
+    </div>
+  </div>
+
+  <div class="table-card">
+    <div class="table-header">
+      <input type="search" id="searchInput" placeholder="Search name, phone, area, model..." style="width:300px; padding:9px 14px; border:1.5px solid var(--border); border-radius:var(--radius-md); outline:none;" oninput="render()" />
+      <div style="display:flex; gap:10px;">
+        <button class="btn btn-ai" onclick="toggleAIDrawer()">🤖 AI Control Assistant</button>
+        <button class="btn btn-primary" onclick="openModal()">+ Add New Client</button>
+      </div>
+    </div>
+    <div class="table-scroll">
+      <table>
+        <thead>
+          <tr>
+            <th>Client Name</th>
+            <th>Phone</th>
+            <th>Area / Pincode</th>
+            <th>Machine Model</th>
+            <th>Balance Due</th>
+            <th>Next Service</th>
+            <th>Actions</th>
+          </tr>
+        </thead>
+        <tbody id="clientTbody"></tbody>
+      </table>
+    </div>
+  </div>
+</main>
+
+<!-- AI Assistant Drawer Panel -->
+<div class="ai-drawer" id="aiDrawer">
+  <div class="ai-head">
+    <div style="display:flex; align-items:center; gap:8px; font-weight:700;">
+      <span>🤖</span> CRM AI Assistant
+    </div>
+    <button onclick="toggleAIDrawer()" style="background:none; border:none; color:white; font-size:16px; cursor:pointer;">✕</button>
+  </div>
+  <div class="ai-messages" id="aiMessages">
+    <div class="ai-msg bot">Hello! I am your CRM AI Assistant. Try commands like:<br>• <i>"Add customer Rahul phone 9876543210 total 12000 paid 12000"</i><br>• <i>"Mark Rajesh as paid"</i><br>• <i>"Change theme color to dark"</i></div>
+  </div>
+  <div class="ai-input-wrap">
+    <input type="text" id="aiInput" placeholder="Type a command or query..." style="flex:1;" onkeydown="if(event.key==='Enter') executeAICommand()" />
+    <button class="btn btn-ai btn-sm" onclick="executeAICommand()">Send</button>
+  </div>
+</div>
+
+<!-- Add / Edit Modal -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal">
+    <h3 style="font-family:var(--font-display); font-size:1.3rem;" id="modalHeading">Register New Client</h3>
+    <div class="form-grid">
+      <div class="form-group">
+        <label>Full Name *</label>
+        <input type="text" id="mName" placeholder="Client full name" />
+      </div>
+      <div class="form-group">
+        <label>Phone Number *</label>
+        <input type="tel" id="mPhone" maxlength="10" placeholder="10-digit mobile" />
+      </div>
+      <div class="form-group">
+        <label>Area / Pincode</label>
+        <input type="text" id="mArea" placeholder="e.g. Satara (415002)" />
+      </div>
+      <div class="form-group">
+        <label>Machine Model</label>
+        <input type="text" id="mModel" placeholder="e.g. RO-300 Premier" />
+      </div>
+      <div class="form-group">
+        <label>Total Fee (₹)</label>
+        <input type="number" id="mTotal" placeholder="0" />
+      </div>
+      <div class="form-group">
+        <label>Paid Amount (₹)</label>
+        <input type="number" id="mPaid" placeholder="0" />
+      </div>
+    </div>
+    <div style="display:flex; justify-content:flex-end; gap:10px; margin-top:20px;">
+      <button class="btn btn-ghost" onclick="closeModal()">Cancel</button>
+      <button class="btn btn-primary" onclick="saveClient()">Save Record</button>
+    </div>
+  </div>
+</div>
+
+<!-- Cash Bill Receipt Modal -->
+<div class="modal-overlay" id="billModalOverlay">
+  <div class="modal bill-modal">
+    <div class="bill-container" id="printableBill">
+      <div class="header-top">
+        <div>GSTIN : 20GOCPK4941A1ZK</div>
+        <div style="font-size: 15px; text-decoration: underline;">CASH BILL</div>
+        <div>Mob : 7276747350</div>
+      </div>
+
+      <div class="title">SHRI SIDDHIVINAYAK VENTURE</div>
+
+      <div class="subtitle">
+        Satara- 415002<br>
+        Email: sunilbagal73334@gmail.com
+      </div>
+
+      <div class="customer-details">
+        <div class="details-row">
+          <div style="width: 55%; display: flex;">
+            <strong>Name :</strong> <span class="dotted-line" id="billName" style="font-weight:bold; padding-left:5px;"></span>
+          </div>
+          <div style="width: 40%; display: flex;">
+            <strong>Mob :</strong> <span class="dotted-line" id="billMob" style="font-weight:bold; padding-left:5px;"></span>
+          </div>
+        </div>
+
+        <div class="details-row" style="margin-top: 5px;">
+          <div style="width: 55%; display: flex;">
+            <strong>Address :</strong> <span class="dotted-line" id="billAddress" style="font-weight:bold; padding-left:5px;"></span>
+          </div>
+          <div style="width: 20%; display: flex;">
+            <strong>Sr. No :</strong> <span style="font-weight: bold; margin-left: 5px;" id="billSrNo">204</span>
+          </div>
+          <div style="width: 20%; display: flex;">
+            <strong>Date :</strong> <span class="dotted-line" id="billDate" style="font-weight:bold; padding-left:5px;"></span>
+          </div>
+        </div>
+      </div>
+
+      <table>
+        <thead>
+          <tr>
+            <th class="sl-col">Sl. No.</th>
+            <th class="particulars-col">Particulars</th>
+            <th class="qty-col">Qty</th>
+            <th class="rate-col">Rate</th>
+            <th class="amount-col">Amount</th>
+          </tr>
+        </thead>
+        <tbody id="billItemsBody"></tbody>
+      </table>
+    </div>
+
+    <div class="bill-actions" style="display:flex; justify-content:flex-end; gap:10px; margin-top:16px;">
+      <button class="btn btn-ghost" onclick="closeBillModal()">Close</button>
+      <button class="btn btn-primary" onclick="window.print()">🖨️ Print Bill</button>
+    </div>
+  </div>
+</div>
+
+<div id="toastWrap"></div>
+
+<script>
+let state = {
+  role: 'Admin',
+  editingId: null,
+  clients: [
+    { id: '1', name: 'Rajesh Patil', phone: '9822012345', area: 'Satara (415002)', model: 'RO-Aqua Gold Water Purifier', total: 12000, paid: 8000, date: '2026-06-15', serviceLog: [] },
+    { id: '2', name: 'Ankita Shinde', phone: '9423087654', area: 'Satara Road', model: 'RO-X2 Pure System', total: 15000, paid: 15000, date: '2026-07-01', serviceLog: ['2026-07-01'] }
+  ]
+};
+
+function loadState() {
+  const saved = localStorage.getItem('ssv_crm_state');
+  if (saved) state = JSON.parse(saved);
+}
+
+function saveState() {
+  localStorage.setItem('ssv_crm_state', JSON.stringify(state));
+  render();
+}
+
+function toggleRole() {
+  state.role = state.role === 'Admin' ? 'Technician' : 'Admin';
+  document.getElementById('userRole').textContent = state.role;
+  showToast(`Switched view mode to ${state.role}`);
+}
+
+function getNextServiceDate(client) {
+  const lastDate = client.serviceLog.length > 0 ? client.serviceLog[client.serviceLog.length - 1] : client.date;
+  const d = new Date(lastDate);
+  d.setMonth(d.getMonth() + 3);
+  return d.toISOString().slice(0, 10);
+}
+
+function render() {
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const visible = state.clients.filter(c => 
+    c.name.toLowerCase().includes(q) || c.phone.includes(q) || c.area.toLowerCase().includes(q) || c.model.toLowerCase().includes(q)
+  );
+
+  let totalPending = 0;
+  state.clients.forEach(c => totalPending += (c.total - c.paid));
+  document.getElementById('statReceivables').textContent = `₹${totalPending.toLocaleString('en-IN')}`;
+  document.getElementById('statClients').textContent = state.clients.length;
+
+  const today = new Date().toISOString().slice(0, 10);
+  const dueCount = state.clients.filter(c => getNextServiceDate(c) <= today).length;
+  document.getElementById('statServiceDue').textContent = dueCount;
+
+  const tbody = document.getElementById('clientTbody');
+  tbody.innerHTML = visible.map(c => {
+    const due = c.total - c.paid;
+    const isFullyPaid = c.paid >= c.total && c.total > 0;
+    const nextSvc = getNextServiceDate(c);
+
+    const receiptButton = isFullyPaid
+      ? `<button class="btn btn-ghost btn-sm" onclick="showCashBill('${c.id}')">🧾 Receipt</button>`
+      : `<button class="btn btn-disabled btn-sm" title="Bill generates when payment is complete" onclick="showToast('Bill generates only after complete payment!')">🔒 Unpaid</button>`;
+
+    return `
+      <tr>
+        <td><strong>${c.name}</strong></td>
+        <td>${c.phone}</td>
+        <td>${c.area}</td>
+        <td>${c.model}</td>
+        <td>₹${due.toLocaleString('en-IN')} ${due > 0 ? '<span class="badge badge-pending">Due</span>' : '<span class="badge badge-paid">Paid</span>'}</td>
+        <td>${nextSvc <= today ? `<strong style="color:var(--error);">${nextSvc} (Due)</strong>` : nextSvc}</td>
+        <td>
+          <div style="display:flex; gap:6px; flex-wrap:wrap;">
+            <button class="btn btn-edit btn-sm" onclick="openModal('${c.id}')">✏️ Edit</button>
+            ${due > 0 ? `<button class="btn btn-wa btn-sm" onclick="sendWhatsApp('${c.phone}', '${c.name}',${due})">WhatsApp</button>` : ''}
+            ${receiptButton}
+            <button class="btn btn-primary btn-sm" onclick="markServiceDone('${c.id}')">Serviced</button>
+          </div>
+        </td>
+      </tr>`;
+  }).join('');
+}
+
+function sendWhatsApp(phone, name, amount) {
+  const text = encodeURIComponent(`Hello ${name},\nThis is a payment reminder from Shri Siddhivinayak Venture regarding your pending balance of ₹${amount} for your water purifier.\nThank you!`);
+  window.open(`https://wa.me/91${phone}?text=${text}`, '_blank');
+}
+
+function showCashBill(clientId) {
+  const c = state.clients.find(x => x.id === clientId);
+  if (!c) return;
+
+  if (c.paid < c.total) {
+    showToast("Bill can only be generated after full payment is complete!");
+    return;
+  }
+
+  document.getElementById('billName').textContent = c.name;
+  document.getElementById('billMob').textContent = c.phone;
+  document.getElementById('billAddress').textContent = c.area || 'Satara';
+  document.getElementById('billSrNo').textContent = `20${c.id.slice(-2)}`;
+  document.getElementById('billDate').textContent = c.date || new Date().toISOString().slice(0, 10);
+
+  const tbody = document.getElementById('billItemsBody');
+  let rowsHtml = `
+    <tr>
+      <td class="sl-col">1</td>
+      <td>${c.model} Installation & Service</td>
+      <td class="qty-col">1</td>
+      <td class="rate-col">${c.total}</td>
+      <td class="amount-col">${c.paid}</td>
+    </tr>
+  `;
+
+  for (let i = 2; i <= 10; i++) {
+    rowsHtml += `<tr><td class="sl-col"></td><td></td><td></td><td></td><td></td></tr>`;
+  }
+
+  rowsHtml += `
+    <tr class="total-row">
+      <td colspan="4">Total Amount</td>
+      <td>₹${c.paid.toLocaleString('en-IN')}</td>
+    </tr>
+  `;
+
+  tbody.innerHTML = rowsHtml;
+  document.getElementById('billModalOverlay').classList.add('open');
+}
+
+function closeBillModal() {
+  document.getElementById('billModalOverlay').classList.remove('open');
+}
+
+function markServiceDone(clientId) {
+  const client = state.clients.find(c => c.id === clientId);
+  if (!client) return;
+
+  const today = new Date().toISOString().slice(0, 10);
+  client.serviceLog.push(today);
+  saveState();
+  showToast(`Service visit recorded for ${client.name}`);
+}
+
+/* AI Engine Implementation */
+function toggleAIDrawer() {
+  const drawer = document.getElementById('aiDrawer');
+  drawer.classList.toggle('open');
+}
+
+function addAIMessage(msg, sender = 'bot') {
+  const box = document.getElementById('aiMessages');
+  const div = document.createElement('div');
+  div.className = `ai-msg ${sender}`;
+  div.innerHTML = msg;
+  box.appendChild(div);
+  box.scrollTop = box.scrollHeight;
+}
+
+function executeAICommand() {
+  const input = document.getElementById('aiInput');
+  const rawCmd = input.value.trim();
+  if (!rawCmd) return;
+
+  addAIMessage(rawCmd, 'user');
+  input.value = '';
+
+  const cmd = rawCmd.toLowerCase();
+
+  // AI Logic 1: Add Customer Intent
+  if (cmd.includes('add') && (cmd.includes('customer') || cmd.includes('client'))) {
+    const nameMatch = rawCmd.match(/(?:add|customer|client)\s+([A-Za-z\s]+?)(?=\s+(?:phone|mobile|total|paid|model|area)|$)/i);
+    const phoneMatch = rawCmd.match(/(?:phone|mobile|mob)\s*(\d{10})/i);
+    const totalMatch = rawCmd.match(/(?:total|fee|amount)\s*(\d+)/i);
+    const paidMatch = rawCmd.match(/(?:paid)\s*(\d+)/i);
+    const modelMatch = rawCmd.match(/(?:model)\s+([A-Za-z0-9\s-]+?)(?=\s+(?:phone|total|paid|area)|$)/i);
+    const areaMatch = rawCmd.match(/(?:area)\s+([A-Za-z0-9\s()-]+?)(?=\s+(?:phone|total|paid|model)|$)/i);
+
+    const name = nameMatch ? nameMatch[1].trim() : "New Client";
+    const phone = phoneMatch ? phoneMatch[1] : "9999999999";
+    const total = totalMatch ? Number(totalMatch[1]) : 10000;
+    const paid = paidMatch ? Number(paidMatch[1]) : 0;
+    const model = modelMatch ? modelMatch[1].trim() : "RO System";
+    const area = areaMatch ? areaMatch[1].trim() : "Satara";
+
+    state.clients.push({
+      id: Date.now().toString(),
+      name, phone, area, model, total, paid,
+      date: new Date().toISOString().slice(0, 10),
+      serviceLog: []
+    });
+    saveState();
+    addAIMessage(`Added client <b>${name}</b> with total fee ₹${total} and paid amount ₹${paid}.`);
+    return;
+  }
+
+  // AI Logic 2: Mark Paid / Edit Bill Intent
+  if ((cmd.includes('mark') || cmd.includes('edit') || cmd.includes('set')) && cmd.includes('paid')) {
+    const client = state.clients.find(c => cmd.includes(c.name.toLowerCase().split(' ')[0]));
+    if (client) {
+      const valMatch = cmd.match(/\d+/);
+      client.paid = valMatch ? Number(valMatch[0]) : client.total;
+      saveState();
+      addAIMessage(`Updated bill for <b>${client.name}</b>. Total paid is now ₹${client.paid}.`);
+    } else {
+      addAIMessage("Could not find a matching client name to update bill.");
+    }
+    return;
+  }
+
+  // AI Logic 3: Website Theme & UI Customization Intent
+  if (cmd.includes('theme') || cmd.includes('background') || cmd.includes('dark') || cmd.includes('color') || cmd.includes('font')) {
+    if (cmd.includes('dark')) {
+      document.body.style.background = "#0F172A";
+      document.body.style.color = "#F8FAFC";
+      addAIMessage("Switched website theme to <b>Dark Mode</b>.");
+    } else if (cmd.includes('blue')) {
+      document.body.style.background = "#EFF6FF";
+      addAIMessage("Updated website background color to <b>Light Blue</b>.");
+    } else if (cmd.includes('reset')) {
+      document.body.style.background = "var(--bg-page)";
+      document.body.style.color = "var(--text-primary)";
+      addAIMessage("Reset website theme to default.");
+    } else {
+      addAIMessage("I can customize the website theme. Try asking: <i>'Change theme to dark'</i> or <i>'Reset theme'</i>.");
+    }
+    return;
+  }
+
+  // Fallback / Guidance
+  addAIMessage("I didn't quite catch that. You can tell me to:<br>• <i>Add customer [Name] phone [Number] total [Amt] paid [Amt]</i><br>• <i>Mark [Client Name] as paid</i><br>• <i>Change theme to dark</i>");
+}
+
+function openModal(editId = null) {
+  state.editingId = editId;
+  const modalHeading = document.getElementById('modalHeading');
+
+  if (editId) {
+    const client = state.clients.find(c => c.id === editId);
+    if (!client) return;
+
+    modalHeading.textContent = "Edit Client Record";
+    document.getElementById('mName').value = client.name;
+    document.getElementById('mPhone').value = client.phone;
+    document.getElementById('mArea').value = client.area;
+    document.getElementById('mModel').value = client.model;
+    document.getElementById('mTotal').value = client.total;
+    document.getElementById('mPaid').value = client.paid;
+  } else {
+    modalHeading.textContent = "Register New Client";
+    document.getElementById('mName').value = '';
+    document.getElementById('mPhone').value = '';
+    document.getElementById('mArea').value = '';
+    document.getElementById('mModel').value = '';
+    document.getElementById('mTotal').value = '';
+    document.getElementById('mPaid').value = '0';
+  }
+
+  document.getElementById('modalOverlay').classList.add('open');
+}
+
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  state.editingId = null;
+}
+
+function saveClient() {
+  const name = document.getElementById('mName').value.trim();
+  const phone = document.getElementById('mPhone').value.trim();
+  const area = document.getElementById('mArea').value.trim();
+  const model = document.getElementById('mModel').value.trim();
+  const total = Number(document.getElementById('mTotal').value) || 0;
+  const paid = Number(document.getElementById('mPaid').value) || 0;
+
+  if (!name || !phone) return alert('Name and phone number are required.');
+
+  if (state.editingId) {
+    const idx = state.clients.findIndex(c => c.id === state.editingId);
+    if (idx !== -1) {
+      state.clients[idx] = { ...state.clients[idx], name, phone, area, model, total, paid };
+      showToast('Client details updated successfully!');
+    }
+  } else {
+    state.clients.push({
+      id: Date.now().toString(),
+      name, phone, area, model, total, paid,
+      date: new Date().toISOString().slice(0, 10),
+      serviceLog: []
+    });
+    showToast('New client registered successfully!');
+  }
+
+  saveState();
+  closeModal();
+}
+
+function showToast(msg) {
+  const wrap = document.getElementById('toastWrap');
+  const el = document.createElement('div');
+  el.className = 'toast';
+  el.textContent = msg;
+  wrap.appendChild(el);
+  setTimeout(() => el.remove(), 3000);
+}
+
+loadState();
+render();
+</script>
+
+</body>
+</html>
